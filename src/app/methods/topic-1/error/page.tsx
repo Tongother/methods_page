@@ -1,13 +1,43 @@
 "use client"
+import { useEffect } from "react";
 import TopicNav1 from "@/src/components/TopicNav1"
 import { motion } from "framer-motion"
 import { manejadorDeInputs } from "@/src/hooks/manejadorDeInputs";
+import { Document } from "postcss";
 
 
 export default function Topic1() {
   const cantidadMedidas = ['2', '3', '4', '5', '6', '7', '8'];
 
-  const {selectedMedida, setSelectedMedida, inputValue, setInputValue} = manejadorDeInputs(cantidadMedidas[0], "");
+  const {selectedMedida, setSelectedMedida, 
+    inputValue, setInputValue, 
+    isButtonClick, setisButtonClick,
+    dataRows, setDataRows} = manejadorDeInputs(cantidadMedidas[0], "", false);
+
+  const h1_Elemento = document.getElementsByClassName("h1_className");
+  const medidaSeleccionadaInt = parseInt(selectedMedida, 10);
+  const valorInputFloat = parseFloat(inputValue);
+  let promedio = 0;
+
+  useEffect(() => {
+    const h1_Elemento = document.getElementsByClassName("h1_className");
+    setDataRows([]);
+
+    for (let i = 0; i < h1_Elemento.length; i++) {
+      h1_Elemento[i].classList.remove("text-white");
+      h1_Elemento[i].textContent = `${i + 1}: `;
+
+      if (medidaSeleccionadaInt > i) {
+        h1_Elemento[i].classList.add("text-white");
+      }
+    }
+  }, [medidaSeleccionadaInt]);
+
+  useEffect(() => {
+    if (dataRows.length > 0) {
+      h1_Elemento[dataRows.length - 1].textContent += `${dataRows[dataRows.length - 1]}`;
+    }
+  }, [dataRows]);
 
   const handleSelectChange = (event:any) => {
     setSelectedMedida(event.target.value);
@@ -20,41 +50,40 @@ export default function Topic1() {
     }
   };
 
-  const errorAbsoluto = ():any => {
-
-    const medidaSeleccionadaInt = parseInt(selectedMedida, 10);
-    const valorInputInt = parseFloat(inputValue);
+  const enviarMedidas = (event:any) => {
   
+    if (!(isNaN(medidaSeleccionadaInt)) && !(isNaN(valorInputFloat)) && (inputValue !== '')) {
+        
+        if(medidaSeleccionadaInt > dataRows.length){
+          setDataRows((prevDataRows) => [...prevDataRows, valorInputFloat]);
+      }
 
-    if (!(isNaN(medidaSeleccionadaInt)) && !(isNaN(valorInputInt))) {
-      agregarFila()
     } else {
 
       alert('Error al convertir valores a enteros');
     }
   };
 
-  const agregarFila = ():any => {
-    if (inputValue !== '') {
-      const tablaBody = document.getElementById("tabla");
 
-      const newRow = document.createElement('tr');
-      const cell1 = document.createElement('td');
-      const cell2 = document.createElement('td');
-      const cell3 = document.createElement('td');
+  const errorAbsoluto = ():any => {
+    if(dataRows.length > 0){
+      let maximo = dataRows.length
+      for(let i=0; i < maximo; i++){
+        promedio += dataRows[i]
+      }
+      promedio = promedio / medidaSeleccionadaInt;
+      
+      for(let i=0; i < maximo; i++){
+        dataRows[dataRows.length + i] = dataRows[i] - promedio;
+        dataRows[dataRows.length + dataRows.length + i] =  Math.pow(2, dataRows[dataRows.length + i])
+      }
+      setisButtonClick(true);
 
-      // Establecer el contenido de las celdas
-      cell1.textContent = inputValue;
-      cell2.textContent = "si";
-      cell3.textContent = "no";
-
-      newRow.appendChild(cell1);
-      newRow.appendChild(cell2);
-      newRow.appendChild(cell3);
-
-      tablaBody?.appendChild(newRow);
+    }else{
+      alert("Por favor, coloque las medidas correspondientes")
     }
-  }
+  };
+
 
     return (
     <div className="flex">
@@ -63,9 +92,8 @@ export default function Topic1() {
           </div>
 
           <div className="w-[100%]">
-          <div className="w-[100%] h-[15vh] grid items-end">
+          <div className="w-[100%] h-[15vh] grid items-center border-b">
               <h1 className="text-white text-[32px] font-bold text-center">Error approximations</h1>
-              <hr />
           </div>
 
           <div className="w-full h-[85%] grid grid-cols-2">
@@ -95,27 +123,63 @@ export default function Topic1() {
             </motion.h1>
 
           <motion.div className="w-full h-[3.5em] grid justify-center items-end">
-            <motion.button type="button" className="w-[8em] h-[2em] bg-white" onClick={errorAbsoluto}>
+            <motion.button type="button" className="w-[8em] h-[2em] bg-white" onClick={enviarMedidas}>
               Enviar medida
             </motion.button>
           </motion.div>
+
+          <motion.div className="text-zinc-400 flex mt-12 pl-[7.5em]">
+            <motion.div id="cajaDatosInputColumna1" className="w-[40%]">
+              <motion.h1 className="h1_className text-white">1: </motion.h1>
+              <motion.h1 className="h1_className text-white">2: </motion.h1>
+              <motion.h1 className="h1_className">3: </motion.h1>
+              <motion.h1 className="h1_className">4: </motion.h1>
+            </motion.div>
+
+            <motion.div id="cajaDatosInputColumna2" className="w-[20%]">
+              <motion.h1 className="h1_className">5:</motion.h1>
+              <motion.h1 className="h1_className">6: </motion.h1>
+              <motion.h1 className="h1_className">7: </motion.h1>
+              <motion.h1 className="h1_className">8: </motion.h1>
+            </motion.div>
           </motion.div>
-          
-          <motion.div className="ml-[-6.5em]">
+
+          <motion.div className="w-full h-[3.5em] grid justify-center items-end">
+            <motion.button type="button" className="w-[10em] h-[2em] bg-white" onClick={() => {errorAbsoluto();}}>
+              Mostrar resultados
+            </motion.button>
+          </motion.div>
+
+          </motion.div>
+
+          <motion.div className="h-[80%] ml-[-2em] grid justify-center mt-12">
+          {isButtonClick && (
               <motion.table
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
+                className=""
               >
                 <thead className="text-white">
-                  <tr>
-                    <th>Medidas tomadas</th>
-                    <th>x - _x_</th>
-                    <th>2^(x - _x_)</th>
+                  <tr className="">
+                    <th className="border border-white">Medidas tomadas</th>
+                    <th className="border border-white">x - _x_</th>
+                    <th className="border border-white">2^(x - _x_)</th>
                   </tr>
                 </thead>
-                <tbody id="tabla" className="text-white" />
-              </motion.table>
+                {dataRows.map((value, index) => (
+                  <motion.tr
+                    key={index}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}>
+
+                    <td className="border border-white text-white text-center">{value.toString()}</td>
+                    <td className="border border-white text-white text-center">{dataRows[dataRows.length + index]}</td>
+                    <td className="border border-white text-white text-center">{dataRows[dataRows.length + dataRows.length + index]}</td>
+                  </motion.tr>
+                  ))}
+              </motion.table>)}
           </motion.div>
           </div>
           </div>
