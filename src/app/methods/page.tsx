@@ -1,5 +1,6 @@
 import TarjetaTemas from "@/src/components/TarjetaTemas"
 import NavBar from "@/src/components/NavBar"
+import Link from "next/link"
 
 export default function numerical_methods() {
     return (
@@ -9,12 +10,12 @@ export default function numerical_methods() {
           <NavBar></NavBar>
         </div>
 
-        <div className="w-full h-[60vh] flex flex-wrap justify-center space-x-4">
-            <TarjetaTemas titulo={"Numerical solution of equations"} description={"Apply the solution of an equation with one variable, taking into account the decrease in error."}></TarjetaTemas>
-            <TarjetaTemas titulo={"System of equations: Jacobi, Gauss, Newton"} description={"Apply numerical methods to find solutions to a system of equations, taking into account the decrease in error."}></TarjetaTemas>
-            <TarjetaTemas titulo={"Interpolation and numerical integration."} description={"Generate a function for which all the original data can be entered and obtain 0 error, since the curve is modeled point by point."}></TarjetaTemas>
-            <TarjetaTemas titulo={"Perform numerical integration"} description={"Use numerical solution methods for equations and systems of equations, as well as their applications."}></TarjetaTemas>
-            <TarjetaTemas titulo={"Systems of Differential Equations"} description={"Predict the value of a function at one point in terms of the value of the function and its derivatives at another point."}></TarjetaTemas>
+        <div className="w-[80%] h-[60vh] flex flex-wrap justify-center space-x-4">
+            <Link href="/methods/topic-1/error"><TarjetaTemas titulo={"Solución numérica de ecuaciones"} description={"Aplicar la solución de una ecuación con una variable, teniendo en cuenta la disminución del error."}></TarjetaTemas></Link>
+            <Link href="/methods/topic-2/gauss-seidel"><TarjetaTemas titulo={"Sistema de ecuaciones: Jacobi, Gauss, Newton"} description={"Aplicar métodos numéricos para encontrar soluciones a un sistema de ecuaciones, teniendo en cuenta la disminución del error."}></TarjetaTemas></Link>
+            <Link href="/methods/topic-3/newton-interpolation"><TarjetaTemas titulo={"Interpolación y integración numérica."} description={"Generar una función para la cual se puedan ingresar todos los datos originales y obtener 0 error, ya que la curva se modela punto por punto."}></TarjetaTemas></Link>
+            <Link href="/methods/topic-4/trapezium"><TarjetaTemas titulo={"Métodos de instración numérica"} description={"Utilizar métodos de solución numérica de ecuaciones y sistemas de ecuaciones, así como sus aplicaciones."}></TarjetaTemas></Link>
+            <Link href="/methods/topic-5/euler"><TarjetaTemas titulo={"Sistema de ecuaciones diferenciales"} description={"Predecir el valor de una función en un punto en términos del valor de la función y sus derivadas en otro punto."}></TarjetaTemas></Link>
         </div>
 
         <div id="ComponenteFooter">

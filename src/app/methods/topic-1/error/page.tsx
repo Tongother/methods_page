@@ -1,9 +1,9 @@
 "use client"
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import TopicNav1 from "@/src/components/TopicNav1"
 import { motion } from "framer-motion"
 import { manejadorDeInputs } from "@/src/hooks/manejadorDeInputs";
-import { Document } from "postcss";
+import ThemeTopic from "@/src/components/themeTopic";
 
 
 export default function Topic1() {
@@ -13,14 +13,18 @@ export default function Topic1() {
     inputValue, setInputValue, 
     isButtonClick, setisButtonClick,
     dataRows, setDataRows} = manejadorDeInputs(cantidadMedidas[0], "", false);
+    let arregloX_X:number[] =[], arregloX_X_Potencia:number[] = []
 
   const h1_Elemento = document.getElementsByClassName("h1_className");
+  const h1_Instrumento = document.getElementsByClassName("h1ResultadoInstrumento");
+  const h1_Medidor = document.getElementsByClassName("h1ResultadoMedidor");
+  const tabla = document.getElementsByClassName("bodyTable");
+
   const medidaSeleccionadaInt = parseInt(selectedMedida, 10);
   const valorInputFloat = parseFloat(inputValue);
   let promedio = 0;
 
   useEffect(() => {
-    const h1_Elemento = document.getElementsByClassName("h1_className");
     setDataRows([]);
 
     for (let i = 0; i < h1_Elemento.length; i++) {
@@ -66,18 +70,76 @@ export default function Topic1() {
 
 
   const errorAbsoluto = ():any => {
+    let eInstrumento = "0.", eMedidor = 0.0, sumaTotalX_XPotencia = 0.0;
+
     if(dataRows.length > 0){
-      let maximo = dataRows.length
-      for(let i=0; i < maximo; i++){
+      for(let i=0; i < dataRows.length; i++){
         promedio += dataRows[i]
       }
       promedio = promedio / medidaSeleccionadaInt;
       
-      for(let i=0; i < maximo; i++){
-        dataRows[dataRows.length + i] = dataRows[i] - promedio;
-        dataRows[dataRows.length + dataRows.length + i] =  Math.pow(2, dataRows[dataRows.length + i])
+      for(let i=0; i < dataRows.length; i++){
+        arregloX_X[i] = dataRows[i] - promedio;
+        arregloX_X_Potencia[i] = Math.pow(arregloX_X[i], 2);
+        sumaTotalX_XPotencia += arregloX_X_Potencia[i];
+      }
+
+      for(let i=0; i < medidaSeleccionadaInt; i++){
+        const fila = document.createElement('tr');
+
+        const celda1 = document.createElement('td');
+        celda1.className = 'border border-white text-white text-center';
+        celda1.textContent = dataRows[i].toString();
+      
+        const celda2 = document.createElement('td');
+        celda2.className = 'border border-white text-white text-center';
+        celda2.textContent = arregloX_X[i].toString();
+      
+        const celda3 = document.createElement('td');
+        celda3.className = 'border border-white text-white text-center';
+        celda3.textContent = arregloX_X_Potencia[i].toString();
+      
+        // Agregar las celdas a la fila
+        fila.appendChild(celda1);
+        fila.appendChild(celda2);
+        fila.appendChild(celda3);
+        tabla[0].appendChild(fila);
       }
       setisButtonClick(true);
+      let cantidadDecimales = 0;
+
+      for (let i = 0; i < dataRows.length; i++) {
+        let arregloCaracteres = dataRows[i].toString().split('');
+        let numD = 0;
+        let contador = false;
+
+        for (let j = 0; j < arregloCaracteres.length; j++) {
+          let c = arregloCaracteres[j];
+
+          if (contador) {
+            numD++;
+            if (numD > cantidadDecimales) cantidadDecimales = numD;
+          }
+
+          if (c === '.') contador = true;
+        }
+      }
+
+      for (let i = 0; i < cantidadDecimales; i++) {
+        if (i + 1 === cantidadDecimales) {
+          eInstrumento += "1";
+          break;
+        }
+        eInstrumento += "0";
+      }
+      
+      eMedidor = Math.sqrt(sumaTotalX_XPotencia / (medidaSeleccionadaInt * (medidaSeleccionadaInt - 1)));
+      eMedidor = Math.round(eMedidor * Math.pow(10, cantidadDecimales)) / Math.pow(10, cantidadDecimales);
+
+      h1_Instrumento[0].textContent = `eInstrumento: ${eInstrumento}`;
+      h1_Medidor[0].textContent = `eMedidor: ${eMedidor}`;
+
+
 
     }else{
       alert("Por favor, coloque las medidas correspondientes")
@@ -92,9 +154,7 @@ export default function Topic1() {
           </div>
 
           <div className="w-[100%]">
-          <div className="w-[100%] h-[15vh] grid items-center border-b">
-              <h1 className="text-white text-[32px] font-bold text-center">Error approximations</h1>
-          </div>
+          <ThemeTopic topic="AROXIMACIÓN DE ERROR"/>
 
           <div className="w-full h-[85%] grid grid-cols-2">
           <motion.div className="w-[22em] h-[100%] border-r border-white">
@@ -136,7 +196,7 @@ export default function Topic1() {
               <motion.h1 className="h1_className">4: </motion.h1>
             </motion.div>
 
-            <motion.div id="cajaDatosInputColumna2" className="w-[20%]">
+            <motion.div id="cajaDatosInputColumna2" className="w-[40%]">
               <motion.h1 className="h1_className">5:</motion.h1>
               <motion.h1 className="h1_className">6: </motion.h1>
               <motion.h1 className="h1_className">7: </motion.h1>
@@ -153,7 +213,6 @@ export default function Topic1() {
           </motion.div>
 
           <motion.div className="h-[80%] ml-[-2em] grid justify-center mt-12">
-          {isButtonClick && (
               <motion.table
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -167,20 +226,15 @@ export default function Topic1() {
                     <th className="border border-white">2^(x - _x_)</th>
                   </tr>
                 </thead>
-                {dataRows.map((value, index) => (
-                  <motion.tr
-                    key={index}
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}>
-
-                    <td className="border border-white text-white text-center">{value.toString()}</td>
-                    <td className="border border-white text-white text-center">{dataRows[dataRows.length + index]}</td>
-                    <td className="border border-white text-white text-center">{dataRows[dataRows.length + dataRows.length + index]}</td>
-                  </motion.tr>
-                  ))}
-              </motion.table>)}
+                <tbody className="bodyTable">
+                </tbody>
+              </motion.table>
+              <motion.div className="text-zinc-400">
+                <motion.h1 className="h1ResultadoInstrumento">eInstrumento: </motion.h1>
+                <motion.h1 className="h1ResultadoMedidor">eMedidor: </motion.h1>
+              </motion.div>
           </motion.div>
+
           </div>
           </div>
           </div>
